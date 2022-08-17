@@ -1,6 +1,6 @@
 # akamBiliChecker
 
-测试Bilibili海外CDN -- upos-hz-mirrorakam.akamaized.net 对应不同 CDN IP 的**下载速度**，可以批量，或检测目前正在使用的解析 IP。
+测试Bilibili海外CDN -- upos-hz-mirrorakam.akamaized.net 以及 upos-sz-mirrorcosov.bilivideo.com对应不同 CDN IP 的**下载速度**，可以批量，或检测目前正在使用的解析 IP。
 
 受到[akamTester](https://github.com/miyouzi/akamTester)启发，制作此工具，但不同在于，本工具检测**直接连接的下载速度**，而不是仅仅测试连接延迟。
 
@@ -8,15 +8,44 @@
 
 ## 安装
 
-本工具使用 shell 脚本和 [ykdl](https://github.com/zhangn1985/ykdl)，请首先安装如下命令和软件包：
+本工具使用 shell 脚本和 [ykdl](https://github.com/SeaHOH/ykdl)，请首先安装如下命令和软件包：
 
 shell 工具：`gnu-awk gnu-sed jq curl`
 
 **目前脚本在 `bash` 下运行**
 
-Mac OS 上建议安装 `gnu` 系列命令，如使用Mac OS原装的BSD sed和awk，请自行修改脚本内命令和参数。
+Mac OS 上建议安装 `gawk, gnu-sed, coreutils` 命令，如使用Mac OS原装的BSD sed和awk，请自行修改脚本内命令和参数。
 
-安装 ykdl（需要python环境）：`pip / pip3 install https://github.com/zhangn1985/ykdl/archive/master.zip`
+如果使用HomeBrew安装以上指令，那么可以在`.zshrc`中添加以下代码片段更换工具：
+
+```bash
+gnu_utils=(
+  coreutils
+  gnu-sed
+  gawk
+  # the other utils ...
+)
+
+gnu() {
+  for _util in "${gnu_utils[@]}"; do
+    export PATH="/usr/local/opt/$_util/libexec/gnubin:$PATH"
+  done
+  [[ $1 == "--quiet" ]] || echo "Switched to GNU utils!"
+}
+
+bsd() {
+  for _util in "${gnu_utils[@]}"; do
+    export PATH="$(echo $PATH | sed "s|/usr/local/opt/$_util/libexec/gnubin:||")"
+  done
+  echo "Switched to BSD utils!"
+}
+
+gnu --quiet
+```
+
+
+
+安装 ykdl（需要python环境）：`pip / pip3 install ykdl`
 
 ## 配置
 

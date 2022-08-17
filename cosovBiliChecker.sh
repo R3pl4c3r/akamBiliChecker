@@ -2,7 +2,7 @@
 
 proxy=""
 
-domain_name="upos-hz-mirrorakam.akamaized.net"
+domain_name="upos-sz-mirrorcosov.bilivideo.com"
 
 trap 'onCtrlC' INT
 function onCtrlC () {
@@ -27,10 +27,17 @@ done
 [[ -z $ip_list ]] && ip_arr="" && num=1
 
 [[ -n $proxy ]] && url=$(ykdl -J --proxy $proxy https://www.bilibili.com/video/BV1ss411h7t4 |  jq -r '.streams."BD-80".src[0]')
-[[ -z $proxy ]] && url=$(ykdl -J https://www.bilibili.com/video/BV1ss411h7t4 |  jq -r '.streams."BD-80".src[0]')
+# [[ -z $proxy ]] && url=$(ykdl -J https://www.bilibili.com/video/BV1ss411h7t4 |  jq -r '.streams."BD-80".src[0]')
+[[ -z $proxy ]] && url=$(curl -Gs 'http://api.bilibili.com/x/player/playurl' \
+--data-urlencode 'bvid=BV1ss411h7t4' \
+--data-urlencode 'cid=13097922' \
+--data-urlencode 'qn=80' \
+--data-urlencode 'fnval=0' \
+--data-urlencode 'fnver=0' \
+--data-urlencode 'fourk=1' 2>&1 | jq -r '.data.durl[0].url')
 [[ -z $url ]] && echo "ERROR: PLS check your ydkl, exit ..." && exit 0
 domain=$(echo $url | awk -F[/:] '{print $4}')
-[[ ! $url =~ $domain_name ]] && echo -e "ERROR: There is NO 'upos-hz-mirrorakam.akamaized.net' found in the url extracted by YKDL, pls check your PROXY settings or YKDL installation, the URL is \n>>> $url" && exit 0
+[[ ! $url =~ $domain_name ]] && echo -e "ERROR: There is no '$domain_name' found in the url extracted by YKDL, pls check your PROXY settings or YKDL installation, the URL is \n>>> $url" && exit 0
 
 echo -e "Checking '$domain_name' extracted by YKDL with: \n>>> $url\n"
 
@@ -52,7 +59,7 @@ fi
 d_speed=""
 http_c=""
 
-out=$(timeout -k 3 15 curl -o /dev/null -s -w \
+out=$(timeout -k 3 15 curl --referer "https://www.bilibili.com/video/BV1ss411h7t4" -o /dev/null -s -w \
 "time_connect: %{time_connect}\n\
 time_starttransfer: %{time_starttransfer}\n\
 time_nslookup:%{time_namelookup}\n\
@@ -63,7 +70,7 @@ speed_download: %{speed_download}\n\
 size_download: %{size_download}\n\
 ssl_verify_result: %{ssl_verify_result}\n\
 remote_ip: %{remote_ip}\n\
-http_code: %{http_code}\n\n" -A '' $resolve $url)
+http_code: %{http_code}\n\n" -A 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36' $resolve $url)
 
 d_speed=$(echo $out | sed -r 's/.*speed_download: ([0-9]+).*/\1/')
 http_c=$(echo $out | sed -r 's/.*http_code: ([0-9]+).*/\1/')
